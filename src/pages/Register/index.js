@@ -1,20 +1,35 @@
 /* eslint-disable react/jsx-no-bind */
 import React from "react";
-import {get} from "lodash";
 import {isEmail} from "validator";
 import {toast} from "react-toastify";
+import {useSelector, useDispatch} from "react-redux";
+import * as actions from "../../store/modules/auth/actions";
 import {Container} from "../../styles/GlobalStyles";
 import {Form} from "./styled";
-import axios from "../../services/axios";
-import history from "../../services/history";
 import Loading from "../../components/Loading";
 
 export default function Register() {
+    const dispatch = useDispatch();
+    const idStored = useSelector((state) => state.auth.usuario.id);
+    const nomeStored = useSelector((state) => state.auth.usuario.nome);
+    const nome_userStored = useSelector(
+        (state) => state.auth.usuario.nome_user
+    );
+    const emailStored = useSelector((state) => state.auth.usuario.email);
+    const isLoading = useSelector((state) => state.auth.isLoading);
+
     const [nome, setNome] = React.useState("");
     const [nome_user, setNome_user] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
-    const [isLoading, setIsLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        if (idStored) {
+            setNome(nomeStored);
+            setEmail(emailStored);
+            setNome_user(nome_userStored);
+        }
+    }, [nomeStored, idStored, nome_userStored, emailStored]);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -35,37 +50,28 @@ export default function Register() {
             toast.error("E-mail inválido");
         }
 
-        if (password.length < 6 || password.length > 50) {
+        if (!idStored && (password.length < 6 || password.length > 50)) {
             formErros = true;
             toast.error("A senha deve ter entre 6 e 50 caracteres");
         }
 
         if (!formErros) {
-            setIsLoading(true);
-            try {
-                const response = await axios.post("/usuarios/create", {
+            dispatch(
+                actions.registerRequest({
                     nome,
                     nome_user,
-                    password,
                     email,
-                });
-                console.log(response.data);
-                toast.success("Cadastro efetuado com sucesso!");
-                history.push("/");
-            } catch (erro) {
-                // const status = get(erro, "response.status", 0);
-                const errors = get(erro, "response.data.errors", []);
-                errors.map((error) => toast.error(error));
-            } finally {
-                setIsLoading(false);
-            }
+                    password,
+                    idStored,
+                })
+            );
         }
     }
 
     return (
         <Container>
             <Loading isLoading={isLoading} />
-            <h1>Crie sua conta</h1>
+            <h1>{idStored ? "Editar dados" : "Crie sua conta"}</h1>
             <Form onSubmit={handleSubmit}>
                 <label htmlFor="nome">
                     Nome:
@@ -107,7 +113,9 @@ export default function Register() {
                         placeholder="Digite a senha do usuário"
                     />
                 </label>
-                <button type="submit">Criar minha conta</button>
+                <button type="submit">
+                    {idStored ? "Modificar usuário" : "Criar usuário"}
+                </button>
             </Form>
         </Container>
     );

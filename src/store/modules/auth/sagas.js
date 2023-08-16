@@ -27,7 +27,52 @@ function persistRehydrate({payload}) {
     }
 }
 
+function* registerRequest({payload}) {
+    const {idStored, nome, nome_user, email, password} = payload;
+
+    try {
+        if (idStored) {
+            yield call(axios.put, "/usuarios/update", {
+                email,
+                nome,
+                nome_user,
+                password: password || undefined,
+            });
+            toast.success("Conta alterada com sucesso!");
+            yield put(actions.registerUpdatedSuccess(payload));
+        } else {
+            yield call(axios.post, "/usuarios/create", {
+                email,
+                nome,
+                nome_user,
+                password,
+            });
+            toast.success("Conta criada com sucesso!");
+            yield put(actions.registerCreatedSuccess(payload));
+            history.push("/login");
+        }
+    } catch (e) {
+        const errors = get(e, "response.data.errors", []);
+        const status = get(e, "response.status");
+
+        if (status === 401) {
+            toast.error("Você precisa fazer o login novamente.");
+            yield put(actions.loginFailure());
+            history.push("/login");
+        }
+
+        if (errors.length > 0) {
+            errors.map((error) => toast.error(error));
+        } else {
+            toast.error("Erro desconhecido");
+        }
+
+        yield put(actions.registerFailure());
+    }
+}
+
 export default all([
     takeLatest(types.LOGIN_REQUEST, loginRequest),
     takeLatest(types.PERSIST_REHYDRATE, persistRehydrate),
+    takeLatest(types.REGISTER_REQUEST, registerRequest),
 ]);
