@@ -4,9 +4,9 @@ import {persistReducer} from "redux-persist";
 export default (reducers) => {
     const persistedReducers = persistReducer(
         {
-            key: "BASE-PROJETO-REACT",
+            key: "CONSUMO-APP-NODE-EM-REACT",
             storage,
-            whitelist: ["example"],
+            whitelist: ["auth"],
         },
         reducers
     );
