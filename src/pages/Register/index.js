@@ -7,12 +7,14 @@ import {Container} from "../../styles/GlobalStyles";
 import {Form} from "./styled";
 import axios from "../../services/axios";
 import history from "../../services/history";
+import Loading from "../../components/Loading";
 
 export default function Register() {
     const [nome, setNome] = React.useState("");
     const [nome_user, setNome_user] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [isLoading, setIsLoading] = React.useState(false);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -39,6 +41,7 @@ export default function Register() {
         }
 
         if (!formErros) {
+            setIsLoading(true);
             try {
                 const response = await axios.post("/usuarios/create", {
                     nome,
@@ -53,12 +56,15 @@ export default function Register() {
                 // const status = get(erro, "response.status", 0);
                 const errors = get(erro, "response.data.errors", []);
                 errors.map((error) => toast.error(error));
+            } finally {
+                setIsLoading(false);
             }
         }
     }
 
     return (
         <Container>
+            <Loading isLoading={isLoading} />
             <h1>Crie sua conta</h1>
             <Form onSubmit={handleSubmit}>
                 <label htmlFor="nome">
