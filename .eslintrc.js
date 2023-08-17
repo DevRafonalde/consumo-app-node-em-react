@@ -50,5 +50,6 @@ module.exports = {
         "import/no-extraneous-dependencies": 0,
         "no-unused-vars": 1,
         camelcase: 0,
+        "no-useless-return": 0,
     },
 };
