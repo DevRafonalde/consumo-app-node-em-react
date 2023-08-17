@@ -1,11 +1,12 @@
 import React from "react";
-import {useParams} from "react-router-dom";
+import {useParams, Link} from "react-router-dom";
+import {FaEdit, FaUserCircle} from "react-icons/fa";
 import {useDispatch} from "react-redux";
 import {isEmail, isInt, isFloat} from "validator";
 import {get} from "lodash";
 import {toast} from "react-toastify";
 import {Container} from "../../styles/GlobalStyles";
-import {Form} from "./styled";
+import {Form, ProfilePicture, Title} from "./styled";
 import Loading from "../../components/Loading";
 import axios from "../../services/axios";
 import history from "../../services/history";
@@ -14,13 +15,14 @@ import * as actions from "../../store/modules/auth/actions";
 export default function Aluno() {
     const dispatch = useDispatch();
     const params = useParams();
-    const id = get(params, "id", 0);
+    const id = get(params, "id", "");
     const [nome, setNome] = React.useState("");
     const [sobrenome, setSobrenome] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [idade, setIdade] = React.useState("");
     const [peso, setPeso] = React.useState("");
     const [altura, setAltura] = React.useState("");
+    const [foto, setFoto] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
 
     React.useEffect(() => {
@@ -31,7 +33,8 @@ export default function Aluno() {
             try {
                 setIsLoading(true);
                 const {data} = await axios.get(`/alunos/show/${id}`);
-                const foto = get(data, "tblFotos[0].url", "");
+                const tblFoto = get(data, "tblFotos[0].url", "");
+                setFoto(tblFoto);
 
                 setNome(data.nome);
                 setSobrenome(data.sobrenome);
@@ -42,7 +45,7 @@ export default function Aluno() {
                 setIsLoading(false);
             } catch (error) {
                 setIsLoading(false);
-                const status = get(error, "response.status", 0);
+                const status = get(error, "response.status", "");
                 const errors = get(error, "response.data.erros", []);
 
                 if (status === 400) {
@@ -144,7 +147,19 @@ export default function Aluno() {
     return (
         <Container>
             <Loading isLoading={isLoading} />
-            <h1>{id ? "Editar Aluno(a)" : "Novo Aluno(a)"}</h1>
+            <Title>{id ? "Editar Aluno(a)" : "Novo Aluno(a)"}</Title>
+            {id && (
+                <ProfilePicture>
+                    {foto ? (
+                        <img src={foto} alt={nome} />
+                    ) : (
+                        <FaUserCircle size={180} />
+                    )}
+                    <Link to={`/fotos/${id}`}>
+                        <FaEdit size={24} />
+                    </Link>
+                </ProfilePicture>
+            )}
             <Form onSubmit={handleSubmit}>
                 <input
                     type="text"

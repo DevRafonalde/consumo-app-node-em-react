@@ -12,6 +12,7 @@ import {Container} from "../../styles/GlobalStyles";
 import axios from "../../services/axios";
 import {AlunoContainer, ProfilePicture, NovoAluno} from "./styled";
 import Loading from "../../components/Loading";
+import * as colors from "../../config/colors";
 
 export default function Alunos() {
     const [alunos, setAlunos] = React.useState([]);
@@ -71,12 +72,15 @@ export default function Alunos() {
                         <span>{aluno.nome}</span>
                         <span>{aluno.email}</span>
                         <Link to={`/aluno/${aluno.id}/edit`}>
-                            <FaEdit size={16} />
+                            <FaEdit size={16} color={colors.primaryColor} />
                         </Link>
                         <Link
                             onClick={handleDeleteAsk}
                             to={`/aluno/${aluno.id}/delete`}>
-                            <FaWindowClose size={16} />
+                            <FaWindowClose
+                                size={16}
+                                color={colors.primaryColor}
+                            />
                         </Link>
                         <FaExclamation
                             size={16}
